@@ -21,6 +21,17 @@ For a code review, the shortest useful route is:
 The notebooks include explanatory Markdown and verification output; they are not required merely to
 open the submitted Power BI report, because the PBIX contains the imported snapshot.
 
+## Review modes
+
+**Code and artifact review — no MySQL installation required.** The reviewer can inspect the complete
+DDL, loader code and notebook output on GitHub, then open the submitted PBIX with its imported data.
+The repository deliberately contains neither credentials nor access to the author's local database.
+
+**Full rebuild — optional.** The reviewer starts their own MySQL 8 Server, executes `project_1.sql`,
+configures `.env`, and runs the four notebooks in the documented order. MySQL Workbench is only a
+graphical client for the server; another MySQL 8 client works equally well. A historical FX backfill
+requires the reviewer's own APILayer key, while the World Bank loaders require no authentication.
+
 ## Data flow
 
 ~~~text
@@ -86,7 +97,11 @@ $env:PYTHONPATH = (Resolve-Path "parts/01-02-data-pipeline")
 
 Execute [project_1.sql](project_1.sql) in MySQL Workbench or another MySQL 8 client. The script
 creates and selects the `analyst_test` database. Keep `MYSQL_DATABASE=analyst_test` in `.env` unless
-the script and configuration are deliberately changed together.
+the script and configuration are deliberately changed together. In Workbench, connect to a running
+server, choose **File → Open SQL Script**, open `project_1.sql`, and execute the complete script.
+
+> The script preserves and upgrades `exchange_rates`, but intentionally drops and rebuilds `gdp`
+> and `population` inside `analyst_test`. It should not be pointed at an unrelated production schema.
 
 Then start Jupyter:
 
