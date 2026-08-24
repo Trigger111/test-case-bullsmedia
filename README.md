@@ -12,7 +12,8 @@ then follow the implementation detail. Data figures below are a snapshot as of *
    imported data, so reviewing the report does not require a database refresh.
 3. Open the corrected [Part 5 workbook](parts/05-google-sheets/data/final.xlsx) and its
    [analysis document](parts/05-google-sheets/part-5-analysis-report.docx).
-4. For a technical review, inspect the [SQL schema](parts/01-02-data-pipeline/project_1.sql),
+4. For a technical review, start with the [Parts 1–2 pipeline guide](parts/01-02-data-pipeline/README.md),
+   then inspect the [SQL schema](parts/01-02-data-pipeline/project_1.sql),
    [ETL helpers](parts/01-02-data-pipeline/etl.py),
    [architecture decisions](parts/04-documentation/decisions.md) and
    [data dictionary](parts/04-documentation/data-dictionary.md).
@@ -21,7 +22,7 @@ then follow the implementation detail. Data figures below are a snapshot as of *
 
 | Part | Result | Primary files |
 | --- | --- | --- |
-| 1 — External data | APILayer exchange-rate ingestion | [API notebook](parts/01-02-data-pipeline/notebooks/api.ipynb), [ETL helpers](parts/01-02-data-pipeline/etl.py) |
+| 1 — External data | APILayer exchange-rate ingestion | [Pipeline guide](parts/01-02-data-pipeline/README.md), [API notebook](parts/01-02-data-pipeline/notebooks/api.ipynb) |
 | 2 — Database | Five tables, five analytical/quality views and World Bank loaders | [Schema](parts/01-02-data-pipeline/project_1.sql), [notebooks](parts/01-02-data-pipeline/notebooks/) |
 | 3 — Power BI | Three-page interactive report with readable PBIP source | [PBIX](parts/03-power-bi/Bulls-media.pbix), [Power BI notes](parts/03-power-bi/README.md) |
 | 4 — Documentation | Design rationale, economic assumptions and automation | [Report](parts/04-documentation/report.md), [ADRs](parts/04-documentation/decisions.md) |
