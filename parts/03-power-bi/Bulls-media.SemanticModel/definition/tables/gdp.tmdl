@@ -1,0 +1,309 @@
+table gdp
+	lineageTag: d465956a-5b21-4914-b450-e149315d0cc1
+
+	/// Nominal GDP in current US dollars, as published by the World Bank.
+	measure 'GDP (USD)' = SUM ( gdp[gdp_in_usd] )
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 42af9d2f-3236-40a0-8a83-e58a5df5693f
+
+	/// Total population.
+	measure Population =
+			-- Lives on the gdp table because a measure cannot share a name with
+			-- a column in its own table, and population[population] holds that name.
+			SUM ( population[population] )
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 258c1d41-ee3d-42d9-8dae-1c6313191304
+
+	/// GDP per capita in USD. Deliberately a ratio of sums.
+	measure 'GDP per Capita (USD)' =
+			-- Ratio of sums over the same country-year coverage on both sides.
+			DIVIDE ( [GDP (USD)], [Population (GDP-matched)] )
+		formatString: #,##0.00
+		displayFolder: 01 Base
+		lineageTag: 2117939b-50b6-40b3-93b1-a63afcb53258
+
+	/// GDP recalculated into the selected currency, converted per year at that year's average rate.
+	measure 'GDP (Selected Currency)' =
+			-- Converts at the YEAR grain, then sums.
+			--
+			-- The wrong version is SUM(gdp) * SELECTEDVALUE(rate): across several years
+			-- that multiplies a multi-year total by a single year's rate. SUMX over the
+			-- years in scope gives each year its own rate before anything is added up.
+			VAR Ccy = [Selected Currency]
+			RETURN
+			    SUMX (
+			        VALUES ( dim_year[year] ),
+			        VAR GdpUsd = CALCULATE ( SUM ( gdp[gdp_in_usd] ) )
+			        VAR Rate =
+			            CALCULATE (
+			                SELECTEDVALUE ( fact_fx_annual[avg_rate] ),
+			                REMOVEFILTERS ( dim_currency ),
+			                dim_currency[currency_code] = Ccy
+			            )
+			        RETURN GdpUsd * Rate
+			    )
+		formatString: #,##0
+		displayFolder: 02 Currency conversion
+		lineageTag: c0d13206-5c83-4933-b045-d2be1dd82eaf
+
+	/// GDP per capita in the selected currency. Ratio of sums.
+	measure 'GDP per Capita (Selected Currency)' =
+			DIVIDE (
+			    [GDP (Selected Currency)],
+			    [Population (GDP-matched)]
+			)
+		formatString: #,##0.00
+		displayFolder: 02 Currency conversion
+		lineageTag: 1d1f1b4e-1bce-4d20-9d00-39cb60496850
+
+	/// GDP in the country's own currency. Single-country only, by design.
+	measure 'GDP (Local Currency)' =
+			-- Each country's GDP in its own currency, resolved through
+			-- dim_country[local_currency] - the bridge the task asks for.
+			--
+			-- Blank unless one country is in context: adding PLN to JPY to UAH
+			-- produces a number with no meaning, so the measure refuses to do it.
+			VAR LocalCcy = SELECTEDVALUE ( dim_country[local_currency] )
+			VAR Result =
+			    SUMX (
+			        VALUES ( dim_year[year] ),
+			        VAR GdpUsd = CALCULATE ( SUM ( gdp[gdp_in_usd] ) )
+			        VAR Rate =
+			            CALCULATE (
+			                SELECTEDVALUE ( fact_fx_annual[avg_rate] ),
+			                REMOVEFILTERS ( dim_currency ),
+			                dim_currency[currency_code] = LocalCcy
+			            )
+			        RETURN GdpUsd * Rate
+			    )
+			RETURN
+			    IF ( HASONEVALUE ( dim_country[country_iso3] ), Result )
+		formatString: #,##0
+		displayFolder: 02 Currency conversion
+		lineageTag: bbd4ae4a-3645-4476-875b-316305162d2d
+
+	/// Distinct countries that have a GDP figure in the current context.
+	measure 'Countries with GDP' = DISTINCTCOUNT ( gdp[country_iso3] )
+		formatString: #,##0
+		displayFolder: 03 Data quality
+		lineageTag: 0a62dda8-3798-451d-962e-78b0f9474088
+
+	/// Share of in-scope countries that have GDP published.
+	measure 'GDP Coverage %' =
+			-- Counts country-year observations, so multi-year selections remain valid.
+			VAR GdpCountryYears =
+			    COUNTROWS (
+			        SUMMARIZE (
+			            gdp,
+			            gdp[country_iso3],
+			            gdp[year]
+			        )
+			    )
+			VAR PopulationCountryYears =
+			    COUNTROWS (
+			        SUMMARIZE (
+			            population,
+			            population[country_iso3],
+			            population[year]
+			        )
+			    )
+			RETURN
+			    DIVIDE ( GdpCountryYears, PopulationCountryYears )
+		formatString: 0.0%
+		displayFolder: 03 Data quality
+		lineageTag: 697f0815-0795-4641-ab90-f7217d62d552
+
+	/// GDP per capita of the whole region the country in context belongs to. Comparison baseline.
+	measure 'GDP per Capita (Region Avg)' =
+			-- Answers "is this country rich or poor for where it is?".
+			--
+			-- REMOVEFILTERS ( dim_country ) drops the country selection but leaves the
+			-- year filter alone, then the region of the country in context is put back.
+			-- Still a ratio of sums, for the same reason as [GDP per Capita (USD)]:
+			-- averaging per-country ratios would let Monaco outvote Germany.
+			VAR Rgn = SELECTEDVALUE ( dim_country[region] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( Rgn ),
+			        CALCULATE (
+			            [GDP per Capita (USD)],
+			            REMOVEFILTERS ( dim_country ),
+			            dim_country[region] = Rgn
+			        )
+			    )
+		formatString: #,##0.00
+		displayFolder: 01 Base
+		lineageTag: 73b8e67f-c1c7-448a-abdb-96a00d54be5d
+
+	/// The country's share of its own region's GDP. Blank unless one region is in context.
+	measure 'GDP Share of Region %' =
+			-- Reads as "how much of this region's economy is this one country?".
+			-- Kept in USD on both sides: a share is a ratio, so the currency cancels
+			-- and converting first would only add rounding.
+			VAR Rgn = SELECTEDVALUE ( dim_country[region] )
+			VAR RegionGdp =
+			    CALCULATE (
+			        [GDP (USD)],
+			        REMOVEFILTERS ( dim_country ),
+			        dim_country[region] = Rgn
+			    )
+			RETURN
+			    IF ( NOT ISBLANK ( Rgn ), DIVIDE ( [GDP (USD)], RegionGdp ) )
+		formatString: 0.0%
+		displayFolder: 01 Base
+		lineageTag: 51bcfa5a-6fab-4eac-af17-5ec0d42a0108
+
+	/// Distinct countries carrying a population figure - the complete grid GDP is measured against.
+	measure 'Countries with Population' =
+			-- Pairs with [Countries with GDP]. Population is a full 217 x 6 grid,
+			-- so the gap between the two counts IS the GDP coverage gap.
+			DISTINCTCOUNT ( population[country_iso3] )
+		formatString: #,##0
+		displayFolder: 03 Data quality
+		lineageTag: 3a62effb-a8b5-42ab-b336-bd71166ca873
+
+	/// One line of identity for the country in context: region, income group, local currency.
+	measure 'Country Context' =
+			-- Replaces a multiRowCard that listed every country in the model whenever no
+			-- single country was selected - 217 rows of noise in a 736 x 386 block.
+			--
+			-- Empty string rather than BLANK for the same reason as [Currency Warning]:
+			-- a card bound to a blank measure prints (Blank).
+			--
+			-- It also carries the page's EMPTY STATE. With no country picked, the KPI
+			-- cards above show every country summed across every year - 618.8 tn USD,
+			-- which is correct arithmetic and a confusing thing to meet on a page called
+			-- Country Detail. Blanking those cards is not the fix: a numeric measure
+			-- returning BLANK renders as the literal "(Blank)", four times over. Saying
+			-- plainly what the numbers currently mean costs nothing and removes the trap.
+			VAR C = SELECTEDVALUE ( dim_country[country_name] )
+			VAR R = SELECTEDVALUE ( dim_country[region] )
+			VAR I = SELECTEDVALUE ( dim_country[income_group] )
+			VAR L = SELECTEDVALUE ( dim_country[local_currency] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( C ),
+			        C & "  |  " & R & "  |  " & I & "  |  "
+			            & IF ( ISBLANK ( L ), "no quoted currency", L ),
+			        "Pick one country in the rail. Until then the cards above total "
+			            & "every country in scope, and local currency stays blank."
+			    )
+		displayFolder: 01 Base
+		lineageTag: 45366593-15b9-4cd4-82d3-7f3dc93ef95a
+
+	/// Population for exactly the country-year observations that carry GDP.
+	measure 'Population (GDP-matched)' =
+			VAR CountryYearsWithGDP =
+			    SUMMARIZE (
+			        gdp,
+			        gdp[country_iso3],
+			        gdp[year]
+			    )
+			RETURN
+			    CALCULATE (
+			        [Population],
+			        TREATAS (
+			            CountryYearsWithGDP,
+			            population[country_iso3],
+			            population[year]
+			        )
+			    )
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 63788a59-c380-4f98-a0ca-93160ac3515d
+
+	column id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a6d136da-45d5-441c-aae7-8e3edd81ed14
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6c40c620-71e2-4923-921d-4b3825453b6b
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		isHidden
+		lineageTag: 87c71468-b571-47ff-a638-819c5817aca9
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column country_iso3
+		dataType: string
+		isHidden
+		lineageTag: 49fc7845-d956-4fea-96fc-f73195a0b424
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	column gdp_in_usd
+		dataType: double
+		isHidden
+		lineageTag: c7f0b790-9469-40b2-9066-f833f6ed674e
+		summarizeBy: sum
+		sourceColumn: gdp_in_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column created_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 74636332-14dd-419d-9b39-5c0e78a21ef6
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 7a780a2e-eaf8-469d-b91c-a8b3b6b9e3a7
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Row-level GDP per capita in USD, for validation at country-year grain.
+	column 'GDP per Capita Row (USD)' =
+			VAR PopulationForRow =
+			    LOOKUPVALUE (
+			        population[population],
+			        population[country_iso3], gdp[country_iso3],
+			        population[year], gdp[year]
+			    )
+			RETURN
+			    DIVIDE ( gdp[gdp_in_usd], PopulationForRow )
+		dataType: double
+		formatString: #,##0.00
+		lineageTag: c176ccfe-969f-46cf-b754-651b38a2e17b
+		summarizeBy: none
+
+	partition 'analyst_test gdp' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_gdp = Джерело{[Schema="analyst_test",Item="gdp"]}[Data]
+				in
+				    analyst_test_gdp
+

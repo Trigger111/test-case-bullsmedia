@@ -1,0 +1,74 @@
+table dim_country
+	lineageTag: b284e078-759f-4aa3-99fe-3e9985e04d38
+
+	column country_iso3
+		dataType: string
+		lineageTag: 728a4d37-efd9-49c6-9b23-fad502f36a9a
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	column country_name
+		dataType: string
+		lineageTag: 230faea8-3c4f-4753-b1ba-55ed6bc0194e
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: country_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: 9a36cc70-f8ba-441a-b3a2-90539898f7d3
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column income_group
+		dataType: string
+		lineageTag: 0bcb9e24-7184-4de0-a72d-94a0f94cbb8a
+		summarizeBy: none
+		sourceColumn: income_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column local_currency
+		dataType: string
+		lineageTag: fa443ed0-e9bb-475b-956f-2ba0f3602d2f
+		summarizeBy: none
+		sourceColumn: local_currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: e8d849d7-325d-47cf-a6b2-8295dae01c35
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: fc112ca3-d8b8-42fb-8779-2780c8d9e969
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analyst_test dim_country' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_dim_country = Джерело{[Schema="analyst_test",Item="dim_country"]}[Data]
+				in
+				    analyst_test_dim_country
+

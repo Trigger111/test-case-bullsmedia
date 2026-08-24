@@ -1,0 +1,25 @@
+model Model
+	culture: uk-UA
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: ru-UA
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["dim_year","dim_country","dim_currency","gdp","population","fact_fx_annual","fx_rate_outliers","data_quality"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling","DevMode"]
+
+ref table dim_year
+ref table dim_country
+ref table dim_currency
+ref table gdp
+ref table population
+ref table fact_fx_annual
+ref table fx_rate_outliers
+ref table data_quality
+
+ref cultureInfo uk-UA
+

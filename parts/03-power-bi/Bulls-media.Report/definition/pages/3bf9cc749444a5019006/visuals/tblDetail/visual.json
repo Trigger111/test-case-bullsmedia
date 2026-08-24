@@ -1,0 +1,165 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "tblDetail",
+  "position": {
+    "x": 1152,
+    "y": 674,
+    "z": 11000,
+    "height": 374,
+    "width": 736,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_country"
+                    }
+                  },
+                  "Property": "country_name"
+                }
+              },
+              "queryRef": "dim_country.country_name",
+              "nativeQueryRef": "country_name"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "gdp"
+                    }
+                  },
+                  "Property": "GDP (Selected Currency)"
+                }
+              },
+              "queryRef": "gdp.GDP (Selected Currency)",
+              "nativeQueryRef": "GDP (Selected Currency)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "gdp"
+                    }
+                  },
+                  "Property": "GDP per Capita (Selected Currency)"
+                }
+              },
+              "queryRef": "gdp.GDP per Capita (Selected Currency)",
+              "nativeQueryRef": "GDP per Capita (Selected Currency)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "gdp"
+                  }
+                },
+                "Property": "GDP (Selected Currency)"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Country detail'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "67b5cb298a16a3667303",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_country"
+              }
+            },
+            "Property": "country_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "5a6bcb155da9dbaa1b45",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "gdp"
+              }
+            },
+            "Property": "GDP (Selected Currency)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "8eac3d1604c77ba50471",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "gdp"
+              }
+            },
+            "Property": "GDP per Capita (Selected Currency)"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

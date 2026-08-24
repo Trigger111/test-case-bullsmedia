@@ -1,0 +1,61 @@
+table data_quality
+	lineageTag: 16865226-6906-4edf-8ac7-ca86ca10e9d8
+
+	column area
+		dataType: string
+		lineageTag: 447b2a81-5662-44f0-ac0d-2346f5ca00ac
+		summarizeBy: none
+		sourceColumn: area
+
+		annotation SummarizationSetBy = Automatic
+
+	column check_name
+		dataType: string
+		lineageTag: 8b300be5-6936-4353-8e9e-49b00ecd5561
+		summarizeBy: none
+		sourceColumn: check_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column metric
+		dataType: int64
+		formatString: 0
+		lineageTag: 85f9589a-a370-45c2-ae40-6a8f51d35bd0
+		summarizeBy: none
+		sourceColumn: metric
+
+		annotation SummarizationSetBy = Automatic
+
+	column detail
+		dataType: string
+		lineageTag: 6ba01cf1-c0bc-45ec-ac06-917ada7194e3
+		summarizeBy: none
+		sourceColumn: detail
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: c60938cb-b3e1-4a1a-ac86-b1b6b274237e
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit
+		dataType: string
+		lineageTag: a4fad7d5-daef-429c-b774-88afc78b508f
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analyst_test vw_data_quality' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_vw_data_quality = Джерело{[Schema="analyst_test",Item="vw_data_quality"]}[Data]
+				in
+				    analyst_test_vw_data_quality
+

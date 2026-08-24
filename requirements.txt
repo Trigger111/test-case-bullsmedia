@@ -1,0 +1,4 @@
+# Pinned to the versions this project was built and tested against.
+requests==2.34.2
+mysql-connector-python==26.7.0
+python-dotenv==1.2.3

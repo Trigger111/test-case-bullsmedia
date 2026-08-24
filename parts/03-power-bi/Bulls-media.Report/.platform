@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Bulls-media"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "86076e49-9a16-4994-8200-61be1cd443ca"
+  }
+}

@@ -1,0 +1,9 @@
+*.docx binary
+*.pbix binary
+*.xlsx binary
+*.pdf binary
+
+# Power BI Project sources remain reviewable as text.
+*.pbip text
+*.tmdl text
+*.json text

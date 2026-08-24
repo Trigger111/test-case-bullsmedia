@@ -1,0 +1,15 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "c1d2e3f4a5b60718293a",
+  "displayName": "Country Detail",
+  "displayOption": "ActualSize",
+  "height": 1080,
+  "width": 1920,
+  "visualInteractions": [
+    {
+      "source": "p2Country",
+      "target": "p2Peers",
+      "type": "NoFilter"
+    }
+  ]
+}

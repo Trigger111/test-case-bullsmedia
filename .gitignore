@@ -1,0 +1,32 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Power BI temp files
+*.pbix.tmp
+~$*
+**/.pbi/
+**/.pbi/cache.abf
+**/.pbi/localSettings.json
+
+# Local archive and audit artifacts
+bin/
+audit_tmp/
+_backup/
+
+# Generated previews
+REPORT.html
+
+# Local working notes
+CLAUDE.md

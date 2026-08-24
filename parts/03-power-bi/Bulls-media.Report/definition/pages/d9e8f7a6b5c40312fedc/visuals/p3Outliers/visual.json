@@ -1,0 +1,147 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+  "name": "p3Outliers",
+  "position": {
+    "x": 32,
+    "y": 674,
+    "z": 6200,
+    "height": 374,
+    "width": 1216,
+    "tabOrder": 6200
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fx_rate_outliers"
+                    }
+                  },
+                  "Property": "date"
+                }
+              },
+              "queryRef": "fx_rate_outliers.date",
+              "nativeQueryRef": "date"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_currency"
+                    }
+                  },
+                  "Property": "currency_code"
+                }
+              },
+              "queryRef": "dim_currency.currency_code",
+              "nativeQueryRef": "currency_code"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fx_rate_outliers"
+                    }
+                  },
+                  "Property": "rate"
+                }
+              },
+              "queryRef": "fx_rate_outliers.rate",
+              "nativeQueryRef": "rate"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fx_rate_outliers"
+                    }
+                  },
+                  "Property": "local_avg_31d"
+                }
+              },
+              "queryRef": "fx_rate_outliers.local_avg_31d",
+              "nativeQueryRef": "local_avg_31d"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fx_rate_outliers"
+                    }
+                  },
+                  "Property": "ratio_to_local_avg"
+                }
+              },
+              "queryRef": "fx_rate_outliers.ratio_to_local_avg",
+              "nativeQueryRef": "ratio_to_local_avg"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fx_rate_outliers"
+                  }
+                },
+                "Property": "date"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Suspect rates vs their own 31-day moving average'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,232 @@
+table fact_fx_annual
+	lineageTag: 41dad777-f2c4-47ee-9686-2861e0f58a00
+
+	/// The display currency driving every converted measure.
+	measure 'Selected Currency' =
+			-- Falls back to USD when no single currency is selected, so every
+			-- converted measure has a defined base rather than going blank.
+			SELECTEDVALUE ( dim_currency[currency_code], "USD" )
+		displayFolder: 02 Currency conversion
+		lineageTag: 420ef607-65ae-4bdf-864a-0276e7318aa8
+
+	/// USD -> selected currency, annual average. Blank across multiple years by design.
+	measure 'Conversion Rate' =
+			-- Period-average rate: correct for FLOWS such as GDP.
+			-- Use fact_fx_annual[eoy_rate] instead for STOCKS (debt, reserves).
+			VAR Ccy = [Selected Currency]
+			RETURN
+			    CALCULATE (
+			        SELECTEDVALUE ( fact_fx_annual[avg_rate] ),
+			        REMOVEFILTERS ( dim_currency ),
+			        dim_currency[currency_code] = Ccy
+			    )
+		formatString: #,##0.0000
+		displayFolder: 02 Currency conversion
+		lineageTag: 74856554-1e63-4526-86e3-962fc29ce48f
+
+	/// Explicit 'no rate available' message rather than a silent blank.
+	measure 'Currency Warning' =
+			-- Says why a converted figure is missing or shaky, instead of leaving a blank.
+			--
+			-- Returns an empty string, never BLANK: a card bound to a blank measure
+			-- prints the literal word (Blank) in the user's locale, which reads as a
+			-- broken visual. An empty string renders as nothing at all.
+			--
+			-- Reads fact_fx_annual[is_partial_year], which trips when a currency-year has
+			-- under 95% day coverage - either the year is still running, or the currency
+			-- was not quoted for all of it (STN and XCG start 2025-07-18, MRU/SLE/VES
+			-- start late 2022).
+			--
+			-- Only years that actually put a number on the page are judged. Two things
+			-- used to trigger it with no risk behind them, and a warning that is always
+			-- lit is a warning nobody reads:
+			--
+			--   * USD is the base of the whole series, so the rate is identically 1.
+			--     A partial year of 1.0 averages to 1.0 - there is nothing to distort.
+			--   * 2026 has FX for 235 of 365 days and is flagged partial for all 172
+			--     currencies, but GDP stops at 2025. An incomplete 2026 rate cannot
+			--     reach any figure shown, because no 2026 figure exists.
+			--
+			-- YearsShown therefore filters dim_year down to the years carrying GDP in the
+			-- CURRENT context - so on Country Detail it narrows again to the years that
+			-- one country actually reports.
+			VAR Ccy = [Selected Currency]
+			VAR BaseCcy =
+			    -- Read the base from the data rather than hard-coding "USD": if the series
+			    -- is ever rebased, this follows. Blank if the base is not unique, which
+			    -- simply restores the old behaviour instead of hiding a real warning.
+			    CALCULATE ( SELECTEDVALUE ( fact_fx_annual[base_currency] ), REMOVEFILTERS ( ) )
+			VAR YearsShown =
+			    FILTER ( VALUES ( dim_year[year] ), NOT ISBLANK ( [GDP (USD)] ) )
+			VAR YearsInScope = COUNTROWS ( YearsShown )
+			VAR YearsWithRate =
+			    CALCULATE (
+			        COUNTROWS ( fact_fx_annual ),
+			        REMOVEFILTERS ( dim_currency ),
+			        dim_currency[currency_code] = Ccy,
+			        YearsShown
+			    )
+			VAR YearsPartial =
+			    CALCULATE (
+			        COUNTROWS ( fact_fx_annual ),
+			        REMOVEFILTERS ( dim_currency ),
+			        dim_currency[currency_code] = Ccy,
+			        fact_fx_annual[is_partial_year] = 1,
+			        YearsShown
+			    )
+			VAR Missing = YearsInScope - COALESCE ( YearsWithRate, 0 )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        Ccy = BaseCcy, "",
+			        ISBLANK ( YearsInScope ), "",
+			        Missing > 0,
+			            Ccy & ": no rate available for " & Missing & " of " & YearsInScope & " year(s) with GDP",
+			        YearsPartial > 0,
+			            Ccy & ": " & YearsPartial & " year(s) priced on a partial year of rates",
+			        ""
+			    )
+		displayFolder: 03 Data quality
+		lineageTag: 4d67b48a-64bb-49f5-846f-1bd07c984e8d
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 60dda9df-9da2-4795-92a2-f83101b0eb43
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column base_currency
+		dataType: string
+		isHidden
+		lineageTag: 8192488e-305a-43d8-9dc8-c9fc3d499e27
+		summarizeBy: none
+		sourceColumn: base_currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column target_currency
+		dataType: string
+		isHidden
+		lineageTag: 51d848d4-dabf-4e0f-a8e1-6d00412ed8c5
+		summarizeBy: none
+		sourceColumn: target_currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_rate
+		dataType: double
+		lineageTag: 061b73ca-36e8-469d-b50d-ab641216a792
+		summarizeBy: sum
+		sourceColumn: avg_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column eoy_rate
+		dataType: double
+		lineageTag: 34ddddf4-6c01-4b77-a8a7-df72f3cb6bcc
+		summarizeBy: sum
+		sourceColumn: eoy_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column min_rate
+		dataType: double
+		isHidden
+		lineageTag: 1966b33b-a99e-401c-bdbf-30de17a4abc4
+		summarizeBy: sum
+		sourceColumn: min_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column max_rate
+		dataType: double
+		isHidden
+		lineageTag: 520981c8-b9af-49e7-b81d-661eeb1ab8b7
+		summarizeBy: sum
+		sourceColumn: max_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column obs_count
+		dataType: int64
+		formatString: 0
+		lineageTag: bf01b484-2066-4593-9620-1c32c193116a
+		summarizeBy: sum
+		sourceColumn: obs_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column days_in_year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1257d324-a357-410e-bf9a-e8bd80ced901
+		summarizeBy: none
+		sourceColumn: days_in_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column coverage_pct
+		dataType: double
+		lineageTag: 877680ea-e139-4065-aec9-17e90507e113
+		summarizeBy: sum
+		sourceColumn: coverage_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column first_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 1a0677fd-c0f8-44be-9451-164135348511
+		summarizeBy: none
+		sourceColumn: first_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column last_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 3d69ed83-45ad-4d93-8a15-b163f61ff3f7
+		summarizeBy: none
+		sourceColumn: last_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column is_partial_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 5b3cdae0-88bc-4212-be67-c8e5ab59880d
+		summarizeBy: none
+		sourceColumn: is_partial_year
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analyst_test fact_fx_annual' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_fact_fx_annual = Джерело{[Schema="analyst_test",Item="fact_fx_annual"]}[Data]
+				in
+				    analyst_test_fact_fx_annual
+

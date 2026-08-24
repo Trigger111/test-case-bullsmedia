@@ -1,0 +1,80 @@
+table population
+	lineageTag: 77323f9c-b121-401c-be38-0024cf90010a
+
+	column id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 81ca9958-5551-4b98-af57-5d8fdebc69f4
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d04db965-e314-4a57-9b32-3be4996b2a21
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		isHidden
+		lineageTag: de7e70d6-3ae5-44d2-9ec6-e5a4d4ced23c
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column country_iso3
+		dataType: string
+		isHidden
+		lineageTag: 79cca30f-4f95-4065-aab4-c3b00b03aea4
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	column population
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ac9bcdc4-7c5b-4b67-b27a-014ae9369960
+		summarizeBy: sum
+		sourceColumn: population
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 37e3f35f-a221-40a6-87ef-d3b924f8aeb5
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 82157156-ee3a-4075-b726-c8c3e1debadc
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analyst_test population' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_population = Джерело{[Schema="analyst_test",Item="population"]}[Data]
+				in
+				    analyst_test_population
+

@@ -1,0 +1,43 @@
+relationship 2efc3f13-1fd1-4e98-95fb-fdcfbe6072b4
+	isActive: false
+	fromColumn: dim_country.local_currency
+	toColumn: dim_currency.currency_code
+
+	annotation PBI_IsFromSource = FS
+
+relationship 249a8b7c-2b86-4030-9660-c08447b24d88
+	fromColumn: gdp.country_iso3
+	toColumn: dim_country.country_iso3
+
+	annotation PBI_IsFromSource = FS
+
+relationship 1629df29-1d76-44bb-b8ea-95c41cf49e19
+	fromColumn: population.country_iso3
+	toColumn: dim_country.country_iso3
+
+	annotation PBI_IsFromSource = FS
+
+relationship rel_year_gdp
+	fromColumn: gdp.year
+	toColumn: dim_year.year
+
+relationship rel_year_population
+	fromColumn: population.year
+	toColumn: dim_year.year
+
+relationship rel_year_fx
+	fromColumn: fact_fx_annual.year
+	toColumn: dim_year.year
+
+relationship rel_currency_fx
+	fromColumn: fact_fx_annual.target_currency
+	toColumn: dim_currency.currency_code
+
+relationship rel_year_outliers
+	fromColumn: fx_rate_outliers.year
+	toColumn: dim_year.year
+
+relationship rel_currency_outliers
+	fromColumn: fx_rate_outliers.target_currency
+	toColumn: dim_currency.currency_code
+

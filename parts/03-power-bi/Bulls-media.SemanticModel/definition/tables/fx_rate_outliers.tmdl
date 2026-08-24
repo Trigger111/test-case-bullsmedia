@@ -1,0 +1,90 @@
+table fx_rate_outliers
+	lineageTag: 4ab6fe46-7ffc-4343-901e-064453561d7f
+
+	/// Count of rates flagged by the outlier test in SQL.
+	measure 'Suspect FX Rates' =
+			-- Daily rates that disagree with their own centred 31-day moving average
+			-- by more than 2x or less than 0.5x. 194 rows out of 408,928 (0.047%).
+			COUNTROWS ( fx_rate_outliers )
+		formatString: #,##0
+		displayFolder: 03 Data quality
+		lineageTag: 83303b68-3ec8-4265-92ca-812b697ed27d
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 0d8ea819-fd45-4f2e-8852-e56822ba49a7
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0a29fea6-0eef-4d6d-b283-eeddb62cf996
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column base_currency
+		dataType: string
+		isHidden
+		lineageTag: b3565a8d-0944-44f3-88d7-ede0d97788f3
+		summarizeBy: none
+		sourceColumn: base_currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column target_currency
+		dataType: string
+		isHidden
+		lineageTag: bdbcd275-b145-4a1c-a4a2-0d13fd800236
+		summarizeBy: none
+		sourceColumn: target_currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column rate
+		dataType: double
+		lineageTag: a87b074f-98cf-4115-b8a1-3d3e1a6429a5
+		summarizeBy: none
+		sourceColumn: rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column local_avg_31d
+		dataType: double
+		lineageTag: 3b8766b7-775a-4ce2-88ba-95a9d9f56775
+		summarizeBy: none
+		sourceColumn: local_avg_31d
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ratio_to_local_avg
+		dataType: double
+		lineageTag: 0cf802c2-0225-4030-ada3-af62e748d7a3
+		summarizeBy: none
+		sourceColumn: ratio_to_local_avg
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'analyst_test fx_rate_outliers' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_fx_rate_outliers = Джерело{[Schema="analyst_test",Item="fx_rate_outliers"]}[Data]
+				in
+				    analyst_test_fx_rate_outliers
+

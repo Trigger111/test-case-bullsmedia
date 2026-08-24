@@ -1,0 +1,101 @@
+table dim_currency
+	lineageTag: fbb20e9c-eff7-4b48-82ef-6b0eb84f9800
+
+	column currency_code
+		dataType: string
+		lineageTag: da212552-604f-4fe2-9cb3-50bf5eca026d
+		summarizeBy: none
+		sourceColumn: currency_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column currency_name
+		dataType: string
+		lineageTag: 63f868cd-5c12-4f6f-bdce-1c28d53c724f
+		summarizeBy: none
+		sourceColumn: currency_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_fiat
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 23249cb0-10fe-4e44-a1ba-e38111b16952
+		summarizeBy: none
+		sourceColumn: is_fiat
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_active
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9a5aba9b-7d1c-44ae-a877-c029f5e4ea9f
+		summarizeBy: none
+		sourceColumn: is_active
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_iso_4217
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: e62b2b5b-281d-4397-9313-fe9499a9eeaf
+		summarizeBy: none
+		sourceColumn: is_iso_4217
+
+		annotation SummarizationSetBy = Automatic
+
+	column minor_units
+		dataType: int64
+		formatString: 0
+		lineageTag: 79ded02a-5580-4d90-8d21-240121a2f0a5
+		summarizeBy: sum
+		sourceColumn: minor_units
+
+		annotation SummarizationSetBy = Automatic
+
+	column replaced_by
+		dataType: string
+		lineageTag: 9e2ee738-8a1c-46bd-a414-0a5270b41f0f
+		summarizeBy: none
+		sourceColumn: replaced_by
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_selectable
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 58093352-dc77-495b-8c98-7491a238e9ca
+		summarizeBy: none
+		sourceColumn: is_selectable
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: b0e4e945-8492-43c5-b83b-dfe703844196
+		summarizeBy: none
+		sourceColumn: created_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: eece5316-89c6-49a7-8f69-77bc01de6bf0
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analyst_test dim_currency' = m
+		mode: import
+		source =
+				let
+				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    analyst_test_dim_currency = Джерело{[Schema="analyst_test",Item="dim_currency"]}[Data]
+				in
+				    analyst_test_dim_currency
+
