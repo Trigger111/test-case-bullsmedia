@@ -54,8 +54,8 @@ table data_quality
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_vw_data_quality = Джерело{[Schema="analyst_test",Item="vw_data_quality"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="vw_data_quality"]}[Data]
 				in
-				    analyst_test_vw_data_quality
+				    Navigation
 

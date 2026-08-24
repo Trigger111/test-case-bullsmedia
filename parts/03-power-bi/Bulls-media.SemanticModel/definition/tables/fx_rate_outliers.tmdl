@@ -83,8 +83,8 @@ table fx_rate_outliers
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_fx_rate_outliers = Джерело{[Schema="analyst_test",Item="fx_rate_outliers"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="fx_rate_outliers"]}[Data]
 				in
-				    analyst_test_fx_rate_outliers
+				    Navigation
 

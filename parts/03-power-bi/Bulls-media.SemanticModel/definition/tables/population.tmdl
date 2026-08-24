@@ -73,8 +73,8 @@ table population
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_population = Джерело{[Schema="analyst_test",Item="population"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="population"]}[Data]
 				in
-				    analyst_test_population
+				    Navigation
 

@@ -302,8 +302,8 @@ table gdp
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_gdp = Джерело{[Schema="analyst_test",Item="gdp"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="gdp"]}[Data]
 				in
-				    analyst_test_gdp
+				    Navigation
 

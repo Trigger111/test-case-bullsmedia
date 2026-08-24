@@ -225,8 +225,8 @@ table fact_fx_annual
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_fact_fx_annual = Джерело{[Schema="analyst_test",Item="fact_fx_annual"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="fact_fx_annual"]}[Data]
 				in
-				    analyst_test_fact_fx_annual
+				    Navigation
 

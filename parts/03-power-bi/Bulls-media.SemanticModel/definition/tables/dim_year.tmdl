@@ -50,8 +50,8 @@ table dim_year
 		mode: import
 		source =
 				let
-				    Джерело = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
-				    analyst_test_dim_year = Джерело{[Schema="analyst_test",Item="dim_year"]}[Data]
+				    Source = MySQL.Database("localhost", "analyst_test", [ReturnSingleDatabase=true]),
+				    Navigation = Source{[Schema="analyst_test",Item="dim_year"]}[Data]
 				in
-				    analyst_test_dim_year
+				    Navigation
 
